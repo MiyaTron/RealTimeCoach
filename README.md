@@ -1,0 +1,2 @@
+Add an ELRS receiver to your flight coach controller for real-time on-course distance and altitude voice guidance from an OpenTx or EdgeTx transmitter.
+Currently the target transmitters are Radiomaster Tx16S and Jumper Tlite.
