@@ -413,8 +413,8 @@ LfFlg_ = true
 tbl_[i_][j_] = celldata_
 end
 end
-end
 io.close(fo_)
+end
 return tbl_, i_ , j_
 end
 local function fieldcsvSet()
@@ -433,7 +433,7 @@ lat_Center_ = tonumber(tbl_[FFn_ +1][4])
 lon_Center_ = tonumber(tbl_[FFn_ +1][5])
 end
 local function  rtcIniWrite()
-local fo_ = io.open(path_ .. "RtC.ini", "w")
+local fo_ = io.open(path_ .. "Rtc.txt", "w")
 io.write(fo_, "FFn_=" .. tostring(FFn_), "\r\n")
 io.write(fo_, "baseDistance_=" .. tostring(baseDistance_), "\r\n")
 io.write(fo_, "deadband_=" .. tostring(deadband_), "\r\n")
@@ -753,7 +753,7 @@ local i_ = 0
 local j_ = 0
 local k_ = 0
 local tbl_ = {}
-tbl_, i_ , j_ = csvTableRead(path_ .. "RtC.ini","=")
+tbl_, i_ , j_ = csvTableRead(path_ .. "Rtc.txt","=")
 for k_ = 1, i_ do
 if tbl_[k_][1] == "FFn_" and tbl_[k_][2] ~= "" then FFn_ = tonumber(tbl_[k_][2]) end
 if tbl_[k_][1] == "baseDistance_" and tbl_[k_][2] ~= "" then baseDistance_ = tonumber(tbl_[k_][2]) end
