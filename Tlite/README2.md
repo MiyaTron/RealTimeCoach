@@ -1,5 +1,5 @@
-for Jumper Tlite Lua script files.
+Lua script files for Jumper T-lite..
 
-Store "Rtc_TL.lua" in the following folder on the SD card.
+Put the files under this Tlite folder into the following folders of T-Lite.
 
 SDcadr\SCRIPTS\TELEMETRY\
