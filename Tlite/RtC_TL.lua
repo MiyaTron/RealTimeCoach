@@ -1,11 +1,11 @@
 --[[
 Rialtime Coach LUA script for Jumper T-Lite
-V1.2023-08-04
 (c) MiyaTron
 overview:  https://youtu.be/vlGcF2CfoDo
 TXmodule and Receiver settings: https://youtu.be/crpQVROY5EM
 Install and operation :   https://youtu.be/BlkOteODjc8
 ]]
+local Ver_ = "V1.20230804"
 local refreshTime_ = 0
 local fieldName_ = {}
 local lat_Pilot_ = 35.0000
@@ -451,18 +451,23 @@ io.write(fo_, "guidanceA_=" .. tostring(guidanceA_), "\r\n")
 io.close(fo_)
 end
 local function page0()
+local X_ = 0
+local Y_ = 0
 lcd.clear()
 if LCD_W < 480 then
-local X_ = LCD_W /2 - Xc_*1.5* #("Real Time Coach")/2
-local Y_ = LCD_H /2 - Yc_*1.5
+X_ = LCD_W /2 - Xc_*1.5* #("Real Time Coach")/2
+Y_ = LCD_H /2 - Yc_*1.5
 lcd.drawText(X_,Y_,"Real Time Coach", MIDSIZE + INVERS )
 X_ = 1
 Y_ = LCD_H - Yc_ - 5
-lcd.drawText(X_,Y_,"(c)MiyaTron")
-lcd.drawText(LCD_W - Xc_*12,Y_,"V1.20230804")
+lcd.drawText(X_,Y_,"(c) MiyaTron")
+X_ = LCD_W - Xc_*(#(Ver_)+0)
 else
 lcd.drawBitmap(page0_img, 0, 0, 100)
+X_ = LCD_W - Xc_*(#(Ver_)+2)
+Y_ = LCD_H - Yc_ - 5
 end
+lcd.drawText(X_,Y_,Ver_)
 end
 local function page12()
 local almD_ = false
