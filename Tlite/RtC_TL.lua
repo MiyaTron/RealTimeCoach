@@ -1,3 +1,11 @@
+--[[
+Rialtime Coach LUA script for Jumper T-Lite
+V1.2023-08-04
+(c) MiyaTron
+overview:  https://youtu.be/vlGcF2CfoDo
+TXmodule and Receiver settings: https://youtu.be/crpQVROY5EM
+Install and operation :   https://youtu.be/BlkOteODjc8
+]]
 local refreshTime_ = 0
 local fieldName_ = {}
 local lat_Pilot_ = 35.0000
@@ -290,20 +298,20 @@ lcd.drawLine(LCD_W/2 + F_ ,Yp_,LCD_W/2 + F_,Yp_ - F_, SOLID, FORCE)
 lcd.drawLine(LCD_W/2 - F_ ,Yp_ - F_,LCD_W/2 + F_,Yp_ - F_, SOLID, FORCE)
 end
 local function distcall()
-if 80 <= rnd(Lypv_,0) and rnd(Lypv_,0) <=200 then
+if 50 <= rnd(Lypv_,0) and rnd(Lypv_,0) <=200 then
 playFile(path_ .. "sound/I" .. string.format("%03d" ,rnd(Lypv_,0) ) .. ".wav")
 vTime_ = vTime_ + 50
 end
 end
 local function hightcall()
-if 80 <= rnd(Lypv_,0) and rnd(Lypv_,0) <=200 and 10 <= alt_ - altBias_ and alt_ - altBias_ <=300 then
+if 50 <= rnd(Lypv_,0) and rnd(Lypv_,0) <=200 and 10 <= alt_ - altBias_ and alt_ - altBias_ <=300 then
 playFile(path_ .. "sound/F" .. string.format("%03d" ,alt_ - altBias_ ) .. ".wav")
 vTime_ = vTime_ + 50
 end
 end
 local function distanceGuidance()
 local alm_ = false
-if (Lypv_ >= 80 and Lypv_ <= 300) then
+if (Lypv_ >= 50 and Lypv_ <= 300) then
 if (Lypv_ > baseDistance_ + deadband_ + guideStep_ * 3) then
 alm_ = true
 playFile(path_ .. "sound/FAR4.wav")
@@ -450,7 +458,8 @@ local Y_ = LCD_H /2 - Yc_*1.5
 lcd.drawText(X_,Y_,"Real Time Coach", MIDSIZE + INVERS )
 X_ = 1
 Y_ = LCD_H - Yc_ - 5
-lcd.drawText(X_,Y_,"(c)2023 MiyaTron")
+lcd.drawText(X_,Y_,"(c)MiyaTron")
+lcd.drawText(LCD_W - Xc_*12,Y_,"V1.20230804")
 else
 lcd.drawBitmap(page0_img, 0, 0, 100)
 end
