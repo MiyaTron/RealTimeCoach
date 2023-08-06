@@ -3,7 +3,7 @@ Rialtime Coach LUA script for Radiomaster TX16S
 (c) MiyaTron
 overview:  https://youtu.be/vlGcF2CfoDo
 TXmodule and Receiver settings: https://youtu.be/crpQVROY5EM
-Install and operation :   https://youtu.be/ T.B.D.
+Install and operation :   https://youtu.be/1qKYEPhsWLY
 ]]
 local Ver_ = "V1.20230804"
 local refreshTime_ = 0
