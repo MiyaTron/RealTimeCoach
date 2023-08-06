@@ -791,8 +791,8 @@ end
 if DN_ == true then
 DN_ = false
 guideStep_ = guideStep_ - 1
-if deadband_ < 1 then
-deadband_ = 1
+if guideStep_ < 1 then
+guideStep_ = 1
 playTone(errTone_, 50, 0 , PLAY_NOW)
 end
 end
