@@ -3,7 +3,7 @@ Rialtime Coach LUA script for Jumper T-Lite
 (c) MiyaTron
 overview:  https://youtu.be/vlGcF2CfoDo
 TXmodule and Receiver settings: https://youtu.be/crpQVROY5EM
-Install and operation :   https://youtu.be/BlkOteODjc8
+Install and operation :   https://youtu.be/L32Tn399__I
 ]]
 local Ver_ = "V1.20230804"
 local refreshTime_ = 0
