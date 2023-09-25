@@ -1,11 +1,15 @@
 --[[
-Rialtime Coach LUA script for Jumper T-Lite
+Rialtime Coach LUA script or Jumper T-Lite
 (c) MiyaTron
 overview:  https://youtu.be/vlGcF2CfoDo
 TXmodule and Receiver settings: https://youtu.be/crpQVROY5EM
 Install and operation :   https://youtu.be/L32Tn399__I
+
+V1.20230925
+Continuous notification of guidance can cause queues to build up and notifications to be delayed, 
+so changes have been made so that the interval between guidance notifications can be adjusted.
 ]]
-local Ver_ = "V1.20230804"
+local Ver_ = "V1.20230925"
 local refreshTime_ = 0
 local fieldName_ = {}
 local lat_Pilot_ = 35.0000
@@ -18,8 +22,8 @@ fieldName_[FFn_] = "fieldName"
 local baseDistance_	= 160.0
 local deadband_  = 10.0
 local guideStep_  = 5.0
-local guidanceY_ = 1
-local guidanceA_ = 1
+local guidanceY_ = 2
+local guidanceA_ = 2
 local Apc_  = 0.0
 local Lpc_  = 0.0
 local Lxpv_ = 0.0
@@ -38,11 +42,15 @@ local posK_  = (baseDistance_/0.8) / (Yp_ * 0.55)
 local cnt_blink_ = 0
 local cnt_blinkMax_ = 12
 local Pi_ = math.pi
+local altflg_ = false
 local altBias_ = 0
 local cnt_keyR_ = 0
 local cnt_MDLR_ = 0
 local sTime_ = 0
 local vTime_ = 0
+local vTime2_ = 0
+local guideInt_ = 100
+local msgTerm_ = 100
 local page_ = 1
 local itemP3_ = 1
 local editP3_ = false
@@ -236,6 +244,9 @@ lcd.drawText(X_,Y_,"X= ??? m" , SMLSIZE ,BRACK)
 X_ = LCD_W - Xc_ * 9
 lcd.drawText(X_,Y_ ,"Y= ??? m" , SMLSIZE ,BRACK)
 end
+if altflg_ == false then
+lcd.drawText(Xc_ * 1,Yc_ * 3,"Altitude reset required" , SMLSIZE + INVERS + BLINK )
+end
 end
 local function drowPosition1(Lx_,Ly_)
 local imgbias_ = 2
@@ -300,69 +311,68 @@ end
 local function distcall()
 if 50 <= rnd(Lypv_,0) and rnd(Lypv_,0) <=200 then
 playFile(path_ .. "sound/I" .. string.format("%03d" ,rnd(Lypv_,0) ) .. ".wav")
-vTime_ = vTime_ + 50
+vTime2_ = vTime2_ + msgTerm_
 end
 end
 local function hightcall()
 if 50 <= rnd(Lypv_,0) and rnd(Lypv_,0) <=200 and 10 <= alt_ - altBias_ and alt_ - altBias_ <=300 then
 playFile(path_ .. "sound/F" .. string.format("%03d" ,alt_ - altBias_ ) .. ".wav")
-vTime_ = vTime_ + 50
+vTime2_ = vTime2_ + msgTerm_
 end
 end
 local function distanceGuidance()
 local alm_ = false
-if (Lypv_ >= 50 and Lypv_ <= 300) then
-if (Lypv_ > baseDistance_ + deadband_ + guideStep_ * 3) then
+local LypvF_ = Lypv_ + (Lypv_ - Lypvprev_)
+if (LypvF_ >= 50 and LypvF_ <= 300) then
+if (LypvF_ > baseDistance_ + deadband_ + guideStep_ * 3) then
 alm_ = true
 playFile(path_ .. "sound/FAR4.wav")
-vTime_ = vTime_ + 50
-elseif	(Lypv_ > baseDistance_ + deadband_ + guideStep_ * 2) then
+vTime2_ = vTime2_ + msgTerm_
+elseif	(LypvF_ > baseDistance_ + deadband_ + guideStep_ * 2) then
 alm_ = true
 playFile(path_ .. "sound/FAR3.wav")
-vTime_ = vTime_ + 50
-elseif	(Lypv_ > baseDistance_ + deadband_ + guideStep_ * 1) then
+vTime2_ = vTime2_ + msgTerm_
+elseif	(LypvF_ > baseDistance_ + deadband_ + guideStep_ * 1) then
 alm_ = true
 playFile(path_ .. "sound/FAR2.wav")
-vTime_ = vTime_ + 50
-elseif	(Lypv_ > baseDistance_ + deadband_) then
+vTime2_ = vTime2_ + msgTerm_
+elseif	(LypvF_ > baseDistance_ + deadband_) then
 alm_ = true
 playFile(path_ .. "sound/FAR1.wav")
-vTime_ = vTime_ + 50
-Lypvprev_ = Lypv_
-elseif	(Lypv_ > baseDistance_) and Lypv_ > Lypvprev_ + 1 then
+vTime2_ = vTime2_ + msgTerm_
+elseif	(LypvF_ > baseDistance_) and LypvF_ > Lypvprev_ + 1 then
 alm_ = true
-Lypvprev_ = Lypv_
 playFile(path_ .. "sound/FAR0.wav")
-vTime_ = vTime_ + 50
+vTime2_ = vTime2_ + msgTerm_
 end
-if (Lypv_ < baseDistance_ - deadband_ - guideStep_ * 3) then
+if (LypvF_ < baseDistance_ - deadband_ - guideStep_ * 3) then
 alm_ = true
 playFile(path_ .. "sound/NEAR4.wav")
-vTime_ = vTime_ + 50
-elseif (Lypv_ < baseDistance_ - deadband_ - guideStep_ * 2) then
+vTime2_ = vTime2_ + msgTerm_
+elseif (LypvF_ < baseDistance_ - deadband_ - guideStep_ * 2) then
 alm_ = true
 playFile(path_ .. "sound/NEAR3.wav")
-vTime_ = vTime_ + 50
-elseif (Lypv_ < baseDistance_ - deadband_ - guideStep_ * 1) then
+vTime2_ = vTime2_ + msgTerm_
+elseif (LypvF_ < baseDistance_ - deadband_ - guideStep_ * 1) then
 alm_ = true
 playFile(path_ .. "sound/NEAR2.wav")
-vTime_ = vTime_ + 50
-elseif (Lypv_ < baseDistance_ - deadband_) then
+vTime2_ = vTime2_ + msgTerm_
+elseif (LypvF_ < baseDistance_ - deadband_) then
 alm_ = true
 playFile(path_ .. "sound/NEAR1.wav")
-vTime_ = vTime_ + 50
-elseif Lypv_ < baseDistance_ and Lypv_ < Lypvprev_ - 1 then
+vTime2_ = vTime2_ + msgTerm_
+elseif LypvF_ < baseDistance_ and LypvF_ < Lypvprev_ - 1 then
 alm_ = true
 playFile(path_ .. "sound/NEAR0.wav")
-vTime_ = vTime_ + 50
+vTime2_ = vTime2_ + msgTerm_
 end
 if alm_ ==  false then
 playFile(path_ .. "sound/good.wav")
-vTime_ = vTime_ + 50
+vTime2_ = vTime2_ + msgTerm_
 else
+end
+end
 Lypvprev_ = Lypv_
-end
-end
 return alm_
 end
 local function hightGuidance()
@@ -370,12 +380,12 @@ local alm_ = false
 if alt_ > altprev_ + 1 then
 alm_ = true
 playFile(path_ .. "sound/Hup.wav")
-vTime_ = vTime_ + 50
+vTime2_ = vTime2_ + msgTerm_
 altprev_ = alt_
 elseif alt_ < altprev_ - 1 then
 alm_ = true
 playFile(path_ .. "sound/Hdown.wav")
-vTime_ = vTime_ + 50
+vTime2_ = vTime2_ + msgTerm_
 altprev_ = alt_
 end
 return alm_
@@ -448,6 +458,8 @@ io.write(fo_, "deadband_=" .. tostring(deadband_), "\r\n")
 io.write(fo_, "guideStep_=" .. tostring(guideStep_), "\r\n")
 io.write(fo_, "guidanceY_=" .. tostring(guidanceY_), "\r\n")
 io.write(fo_, "guidanceA_=" .. tostring(guidanceA_), "\r\n")
+io.write(fo_, "guideInt_=" .. tostring(guideInt_), "\r\n")
+io.write(fo_, "msgTerm_=" .. tostring(msgTerm_), "\r\n")
 io.close(fo_)
 end
 local function page0()
@@ -472,6 +484,7 @@ end
 local function page12()
 local almD_ = false
 local almH_ = false
+local vTimeX_ = 0
 Apc_,Lpc_ = azimuthDistance(lat_Pilot_,lon_Pilot_,lat_Center_,lon_Center_)
 local A_,L_ = azimuthDistance(lat_Pilot_,lon_Pilot_,lat_,lon_)
 Lxpv_ = L_ * math.sin(A_ - Apc_)
@@ -512,42 +525,35 @@ if satLoss == true and (guidanceY_ > 0 or guidanceA_ > 0) then
 playFile(path_ .. "sound/guidStart.wav")
 satLoss = false
 end
-if ( pitch_<= -0.35 or 0.35 <= pitch_ ) then
-if  (getTime() >= vTime_ ) and (guidanceA_ == 1 or guidanceA_ == 3) then
-vTime_ = getTime() + 100
-hightcall()
-end
+if (vTime_ >= vTime2_) then
+vTimeX_ = vTime_
 else
-if  (getTime() >= vTime_ ) then
-vTime_ = getTime() + 100
+vTimeX_ = vTime2_
+end
+if  (getTime() >= vTimeX_ ) then
+vTime2_ = getTime()
+vTime_ = vTime2_ + guideInt_
+if ( (pitch_<= -0.35 or 0.35 <= pitch_) and (guidanceA_ == 1 or guidanceA_ == 3)  ) then
+hightcall()
+else
 if (guidanceY_ == 2 or guidanceY_ == 3) then
 almD_ = distanceGuidance()
-if almD_ == true then
-distcall()
-vTime_ = vTime_ + 50
 end
+if (guidanceY_ == 1 or guidanceY_ == 3)  then
+distcall()
 end
 if (guidanceA_ == 2 or guidanceA_ == 3) then
 almH_ = hightGuidance()
-if almH_ == true then
-hightcall()
-vTime_ = vTime_ + 50
-end
-end
-if almD_ == false and almH_ == false then
-if (guidanceY_ == 1 or guidanceY_ == 3)  then
-distcall()
 end
 if (guidanceA_ == 1 or guidanceA_ == 3) then
 hightcall()
 end
 end
 end
-end
 else
 if satLoss == false and (guidanceY_ > 0 or guidanceA_ > 0) then
 playFile(path_ .. "sound/guidStop.wav")
-vTime_ = vTime_ + 50
+vTime2_ = vTime2_ + 300
 satLoss = true
 end
 end
@@ -555,12 +561,26 @@ end
 local function page3()
 local prevFFn_ = FFn_
 lcd.drawText(3,Yc_ * 0,"Real Time Coach Setting")
-lcd.drawText(Xc_* 1,Yc_ * 1,"Field Name " .. tostring(FFn_),SMLSIZE)
+local	itemP3max_ = 7
+lcd.drawText(Xc_* 1,Yc_ * 1,"Airfield " .. tostring(FFn_),SMLSIZE)
 lcd.drawText(Xc_* 1,Yc_ * 2,"Base Distance [m]",SMLSIZE,BRACK)
 lcd.drawText(Xc_* 1,Yc_ * 3,"Deadband [m]", SMLSIZE )
 lcd.drawText(Xc_* 1,Yc_ * 4,"Guide Step [m]",SMLSIZE,BRACK)
 lcd.drawText(Xc_* 1,Yc_ * 5,"Distance(Y) Guidance",SMLSIZE,BRACK)
 lcd.drawText(Xc_* 1,Yc_ * 6,"Altitude Guidance",SMLSIZE,BRACK)
+if LCD_W >= 480 then
+itemP3max_ = 9
+lcd.drawText(Xc_* 1,Yc_ * 7,"Guide interval[10ms]",SMLSIZE,BRACK)
+lcd.drawText(Xc_* 1,Yc_ * 8,"Message term  [10ms]",SMLSIZE,BRACK)
+lcd.drawText(Xc_* 26,Yc_ * 1,"( Select from field.csv )",SMLSIZE,BRACK)
+lcd.drawText(Xc_* 26,Yc_ * 2,"( Standard value = 150 , 80 - 180 )",SMLSIZE,BRACK)
+lcd.drawText(Xc_* 26,Yc_ * 3,"( Standard value =  10 ,  0 -  50 )",SMLSIZE,BRACK)
+lcd.drawText(Xc_* 26,Yc_ * 4,"( Standard value =   5 ,  1 -  20 )",SMLSIZE,BRACK)
+lcd.drawText(Xc_* 26,Yc_ * 5,"( 0: None, 1: Numeric 2: Guide 3: Both )",SMLSIZE,BRACK)
+lcd.drawText(Xc_* 26,Yc_ * 6,"( 0: None, 1: Numeric 2: Guide 3: Both )",SMLSIZE,BRACK)
+lcd.drawText(Xc_* 26,Yc_ * 7,"( Standard value = 100 ,100 - 500 )",SMLSIZE,BRACK)
+lcd.drawText(Xc_* 26,Yc_ * 8,"( Standard value = 100 , 70 - 200 )",SMLSIZE,BRACK)
+end
 Y_ = LCD_H - Yc_
 lcd.drawText(Xc_* 1,Y_,("(c)MiyaTron"),SMLSIZE,BRACK)
 if itemP3_ == 1 then
@@ -597,7 +617,7 @@ if editP3_ == true then
 lcd.drawText(Xc_* 20,Yc_ * 2,tostring(baseDistance_),SMLSIZE + INVERS + BLINK)
 if UP_ == true then
 UP_ = false
-baseDistance_ = baseDistance_ + 1
+baseDistance_ = baseDistance_ + 5
 if baseDistance_ > 180 then
 baseDistance_ = 180
 playTone(errTone_, 50, 0 , PLAY_NOW)
@@ -605,7 +625,7 @@ end
 end
 if DN_ == true then
 DN_ = false
-baseDistance_ = baseDistance_ - 1
+baseDistance_ = baseDistance_ - 5
 if baseDistance_ < 80 then
 baseDistance_ = 80
 playTone(errTone_, 50, 0 , PLAY_NOW)
@@ -719,15 +739,65 @@ lcd.drawText(Xc_* 20,Yc_ * 6,tostring(guidanceA_),SMLSIZE)
 end
 if itemP3_ == 7 then
 if editP3_ == true then
-lcd.drawText(Xc_* 20,Yc_ * 7,"SAVE", INVERS + BLINK)
+lcd.drawText(Xc_* 20,Yc_ * 7,tostring(guideInt_),SMLSIZE + INVERS + BLINK)
+if UP_ == true then
+UP_ = false
+guideInt_ = guideInt_ + 10
+if guideInt_ > 500 then
+guideInt_ = 500
+playTone(errTone_, 50, 0 , PLAY_NOW)
+end
+end
+if DN_ == true then
+DN_ = false
+guideInt_ = guideInt_ - 10
+if guideInt_ < 100 then
+guideInt_ = 100
+playTone(errTone_, 50, 0 , PLAY_NOW)
+end
+end
+else
+lcd.drawText(Xc_* 20,Yc_ * 7,tostring(guideInt_),SMLSIZE + INVERS)
+end
+else
+lcd.drawText(Xc_* 20,Yc_ * 7,tostring(guideInt_),SMLSIZE)
+end
+if itemP3_ == 8 then
+if editP3_ == true then
+lcd.drawText(Xc_* 20,Yc_ * 8,tostring(msgTerm_),SMLSIZE + INVERS + BLINK)
+if UP_ == true then
+UP_ = false
+msgTerm_ = msgTerm_ + 5
+if msgTerm_ > 200 then
+msgTerm_ = 200
+playTone(errTone_, 50, 0 , PLAY_NOW)
+end
+end
+if DN_ == true then
+DN_ = false
+msgTerm_ = msgTerm_ - 5
+if msgTerm_ < 70 then
+msgTerm_ = 70
+playTone(errTone_, 50, 0 , PLAY_NOW)
+end
+end
+else
+lcd.drawText(Xc_* 20,Yc_ * 8,tostring(msgTerm_),SMLSIZE + INVERS)
+end
+else
+lcd.drawText(Xc_* 20,Yc_ * 8,tostring(msgTerm_),SMLSIZE)
+end
+if itemP3_ == itemP3max_ then
+if editP3_ == true then
+lcd.drawText(Xc_* 20,Yc_ * itemP3max_,"SAVE", INVERS + BLINK)
 rtcIniWrite()
 playTone(exeTone_, 500, 50 , PLAY_NOW)
 editP3_ = false
 else
-lcd.drawText(Xc_* 20,Yc_ * 7,"SAVE", INVERS)
+lcd.drawText(Xc_* 20,Yc_ * itemP3max_,"SAVE", INVERS)
 end
 else
-lcd.drawText(Xc_* 20,Yc_ * 7,"SAVE")
+lcd.drawText(Xc_* 20,Yc_ * itemP3max_,"SAVE")
 end
 if ENT_ == true then
 ENT_ = false
@@ -755,8 +825,8 @@ end
 if UP_ == true then
 UP_ = false
 itemP3_ = itemP3_ + 1
-if itemP3_ > 7 then
-itemP3_ = 7
+if itemP3_ > itemP3max_ then
+itemP3_ = itemP3max_
 playTone(errTone_, 50, 0 , PLAY_NOW)
 end
 end
@@ -775,6 +845,8 @@ if tbl_[k_][1] == "deadband_" and tbl_[k_][2] ~= "" then deadband_ = tonumber(tb
 if tbl_[k_][1] == "guideStep_" and tbl_[k_][2] ~= "" then guideStep_ = tonumber(tbl_[k_][2]) end
 if tbl_[k_][1] == "guidanceY_" and tbl_[k_][2] ~= "" then guidanceY_ = tonumber(tbl_[k_][2]) end
 if tbl_[k_][1] == "guidanceA_" and tbl_[k_][2] ~= "" then guidanceA_ = tonumber(tbl_[k_][2]) end
+if tbl_[k_][1] == "guideInt_" and tbl_[k_][2] ~= "" then guideInt_ = tonumber(tbl_[k_][2]) end
+if tbl_[k_][1] == "msgTerm_" and tbl_[k_][2] ~= "" then msgTerm_ = tonumber(tbl_[k_][2]) end
 end
 fieldcsvSet()
 end
@@ -861,6 +933,7 @@ SYSR_ = false
 if page_ == 2 then
 if sats_ >= 6 then
 altBias_ = alt_
+altflg_ = true
 playTone(exeTone_, 500, 50 , PLAY_NOW)
 end
 end
