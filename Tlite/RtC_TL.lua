@@ -9,7 +9,7 @@ PAGE3(Parameter initial values and setting ranges)
 	"Airfield " 			Tokyo	( Select from field.csv )
 	"Base Distance [m]"		150		( Standard value = 150 , 80 - 180 )
 	"Deadband [m]"			10		( Standard value =  10 ,  0 -  50 )
-	"Voice interval[10ms]"	200		( Standard value = 200 ,200 - 500 )
+	"Voice interval[10ms]"	200		( Standard value = 200 ,150 - 500 )
 	"Distance Guidance"		3		( 1: Tone 2: Voice 3: Both )
 	"Altitude Guidance"		3		( 1: Tone 2: Voice 3: Both )
 
@@ -612,8 +612,8 @@ end
 if DN_ == true then
 DN_ = false
 voiceInt_ = voiceInt_ - 10
-if voiceInt_ < 200 then
-voiceInt_ = 200
+if voiceInt_ < 150 then
+voiceInt_ = 150
 playTone(errTone_, 50, 0 , PLAY_NOW)
 end
 end
